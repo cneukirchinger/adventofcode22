@@ -1,0 +1,67 @@
+FUNCTION_BLOCK "Day1"
+{ S7_Optimized_Access := 'TRUE' }
+VERSION : 0.1
+   VAR_INPUT 
+      start : Bool;
+      rawData : Array[0..2234] of DInt;
+   END_VAR
+
+   VAR_OUTPUT 
+      noAllElves : DInt;
+      maxCaloriesElf : DInt;
+      top3Calories : DInt;
+   END_VAR
+
+   VAR 
+      rTrigStart {InstructionName := 'R_TRIG'; LibVersion := '1.0'} : R_TRIG;
+      data : Array[0..2234] of DInt;
+   END_VAR
+
+   VAR_TEMP 
+      t_index : DInt;
+      t_elvesIndex : DInt;
+      t_pFStart : Bool;
+      t_elvesData : Array[0..2234] of DInt;
+      t_length : DInt;
+      t_index2 : DInt;
+      t_max : DInt;
+   END_VAR
+
+
+BEGIN
+	#rTrigStart(CLK:=#start,
+	            Q=>#t_pFStart);
+	
+	IF #t_pFStart THEN
+	    #noAllElves := 0;
+	    FOR #t_index := 0 TO 2234 DO
+	        #data[#t_index] := 0;
+	    END_FOR;
+	    
+	    
+	    FOR #t_index := 0 TO 2234 DO
+	        // Statement section FOR
+	        #data[#t_elvesIndex] := #data[#t_elvesIndex] + #rawData[#t_index];
+	        IF #rawData[#t_index] = 0 THEN
+	            #t_elvesIndex := #t_elvesIndex + 1;
+	        END_IF;
+	    END_FOR;
+	    
+	    #noAllElves := #t_elvesIndex;
+	    
+	    #t_length := #t_elvesIndex;
+	    FOR #t_index := 0 TO #t_length DO
+	        FOR #t_index2 := 0 TO (#t_length - #t_index) DO
+	            IF #data[#t_index2] > #data[#t_index2 + 1] THEN
+	                #t_max := #data[#t_index2];
+	                #data[#t_index2] := #data[#t_index2 + 1];
+	                #data[#t_index2 + 1] := #t_max;
+	            END_IF;
+	        END_FOR;
+	    END_FOR;
+	    
+	    #maxCaloriesElf := #data[#noAllElves + 1];
+	    
+	    #top3Calories := #data[#noAllElves + 1] + #data[#noAllElves] + #data[#noAllElves - 1];
+	                
+	END_IF;
